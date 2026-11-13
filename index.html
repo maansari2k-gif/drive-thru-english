@@ -1,0 +1,866 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#D64512"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}</style></head><body>
+<title>Drive-Thru English</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;800&family=Noto+Nastaliq+Urdu:wght@400;600&display=swap">
+<style>
+/* Layout: one-column phone app, big tap targets, bottom tab bar. Lexend is built for easier reading. */
+:root{
+  --bg:#F6F4EF; --card:#FFFFFF; --ink:#211C17; --soft:#6B6158; --line:#E4DED4;
+  --flame:#D64512; --flame-ink:#FFFFFF; --mustard:#F2B632; --good:#2E8B43; --bad:#C2410C; --tint:#FCE9DF;
+  --font:"Lexend",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#17130F; --card:#231D18; --ink:#F4EEE6; --soft:#B3A797; --line:#3A3129;
+  --flame:#F0672E; --flame-ink:#1A0E07; --mustard:#F4C04F; --good:#5CC274; --bad:#FF8A4C; --tint:#3A2318; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17130F; --card:#231D18; --ink:#F4EEE6; --soft:#B3A797; --line:#3A3129;
+  --flame:#F0672E; --flame-ink:#1A0E07; --mustard:#F4C04F; --good:#5CC274; --bad:#FF8A4C; --tint:#3A2318; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.4;margin:0}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible{outline:3px solid var(--mustard);outline-offset:2px}
+.app{display:flex;flex-direction:column;min-height:100%;max-width:560px;margin:0 auto}
+main{flex:1;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 110px;display:flex;flex-direction:column;gap:14px}
+h1{font-size:26px;margin:0;font-weight:800;text-wrap:balance}
+h2{font-size:20px;margin:0;font-weight:700}
+.sub{color:var(--soft);font-size:16px;margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.ring{display:flex;align-items:center;gap:16px}
+.ring .num{font-size:40px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.bar{height:14px;border-radius:7px;background:var(--line);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--flame);border-radius:7px;transition:width .4s}
+.step{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:14px 16px;min-height:76px}
+.step .ic{font-size:30px;width:44px;text-align:center;flex:none}
+.step .tx{flex:1;min-width:0}
+.step b{display:block;font-size:19px}
+.step span{color:var(--soft);font-size:15px}
+.step.done{border-color:var(--good)}
+.step.done .chk{color:var(--good)}
+.chk{font-size:26px;color:var(--line);flex:none}
+.big{display:flex;align-items:center;justify-content:center;gap:10px;min-height:64px;border-radius:16px;font-size:20px;font-weight:700;padding:10px 16px;width:100%}
+.primary{background:var(--flame);color:var(--flame-ink)}
+.ghost{background:var(--card);border:2px solid var(--line)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.mic{background:var(--mustard);color:#211C17}
+.mic.on{background:var(--bad);color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.75}}
+@media (prefers-reduced-motion:reduce){.mic.on{animation:none}.bar>i{transition:none}}
+.phrase{font-size:27px;font-weight:700;line-height:1.3;text-wrap:balance}
+.label{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);font-weight:700}
+.sounds{font-size:20px;color:var(--flame);font-style:italic}
+.means{font-size:18px}
+.tip{background:var(--tint);border-radius:14px;padding:12px 14px;font-size:16px}
+.words{font-size:22px;line-height:1.6}
+.w-ok{color:var(--good);font-weight:700}
+.w-miss{color:var(--bad);font-weight:700;text-decoration:underline wavy}
+.score{font-size:22px;font-weight:800}
+.heard{color:var(--soft);font-size:16px}
+.hidebox{border:2px dashed var(--line);border-radius:14px;padding:18px;text-align:center;color:var(--soft)}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);z-index:5}
+nav .in{display:grid;grid-template-columns:repeat(4,1fr);width:100%;max-width:560px}
+nav button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px 12px;font-size:13px;color:var(--soft);font-weight:500}
+nav button i{font-style:normal;font-size:26px}
+nav button[aria-current="page"]{color:var(--flame);font-weight:700}
+.top{display:flex;align-items:center;gap:10px}
+.top .back{font-size:26px;width:48px;height:48px;border-radius:14px;background:var(--card);border:1px solid var(--line);flex:none}
+.top .count{margin-left:auto;color:var(--soft);font-variant-numeric:tabular-nums}
+.cats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cat{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px;text-align:left;min-height:84px;display:flex;flex-direction:column;gap:4px}
+.cat i{font-style:normal;font-size:28px}
+.cat b{font-size:17px}
+.cat .ur{font-size:16px;line-height:1.9}
+.step .ur{font-size:15px;line-height:1.9;text-align:left}
+.pitem .ur{font-size:17px}
+.plist{display:flex;flex-direction:column;gap:8px}
+.pitem{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.pitem .t{flex:1;min-width:0;font-size:17px}
+.pitem button{width:48px;height:48px;border-radius:12px;font-size:22px;background:var(--bg);flex:none}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:120px}
+.week div{display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;font-size:12px;color:var(--soft)}
+.week s{display:block;width:100%;background:var(--flame);border-radius:6px 6px 2px 2px;min-height:3px;text-decoration:none}
+.week s.full{background:var(--good)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg button{min-height:52px;border-radius:12px;border:2px solid var(--line);background:var(--card);font-weight:700}
+.seg button[aria-pressed="true"]{border-color:var(--flame);background:var(--tint)}
+select{font:inherit;font-size:16px;padding:12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);width:100%}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.stats b{display:block;font-size:28px;font-variant-numeric:tabular-nums}
+.stats span{font-size:13px;color:var(--soft)}
+.note{font-size:14px;color:var(--soft)}
+.feature{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:12px}
+.feature:first-of-type{border-top:0;padding-top:0}
+.feature button{align-self:flex-start;padding:8px 14px;border-radius:12px;background:var(--bg);border:1px solid var(--line);font-size:16px}
+.cust{display:flex;gap:10px;align-items:flex-start}
+.cust .who{font-size:28px}
+.ur{font-family:"Noto Nastaliq Urdu","Jameel Noori Nastaleeq","Urdu Typesetting",serif;font-size:19px;line-height:2.1;color:var(--soft);text-align:right;font-weight:400;font-style:normal}
+.phrase+.ur{font-size:21px;color:var(--ink)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-size:16px;z-index:9;max-width:90%}
+</style>
+
+<div class="app">
+  <main id="view" aria-live="polite"></main>
+  <nav><div class="in">
+    <button data-tab="today"><i>🏠</i>Today</button>
+    <button data-tab="phrases"><i>💬</i>Phrases</button>
+    <button data-tab="accent"><i>👂</i>Texas talk</button>
+    <button data-tab="progress"><i>⭐</i>Progress</button>
+  </div></nav>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ============ CONTENT ============ */
+const CATS = [
+  {id:"greet", icon:"👋", name:"Greetings", phrases:[
+    "Welcome to Burger King, what can I get for you today?",
+    "Hi, how are you doing today?",
+    "Good morning! What can I get started for you?",
+    "Go ahead whenever you're ready.",
+    "Take your time, no rush.",
+    "Hi there, I'll be right with you.",
+    "Thanks for waiting, go ahead with your order."]},
+  {id:"order", icon:"🍔", name:"Taking the order", phrases:[
+    "Would you like to make that a meal?",
+    "What size would you like, small, medium, or large?",
+    "Would you like cheese on that?",
+    "Do you want fries or onion rings with that?",
+    "What would you like to drink?",
+    "Anything else for you today?",
+    "Is that for here or to go?",
+    "How many would you like?",
+    "Would you like to try a dessert today?",
+    "Do you need any sauce with your chicken fries?",
+    "We have ketchup, ranch, barbecue, and honey mustard."]},
+  {id:"menu", icon:"📋", name:"Menu words", phrases:[
+    "One Whopper meal, medium size.",
+    "A Double Whopper with cheese.",
+    "Chicken fries, nine piece.",
+    "A small order of onion rings.",
+    "A large Coke and a medium sweet tea.",
+    "A breakfast Croissanwich with sausage, egg, and cheese.",
+    "Two cheeseburgers, no pickles.",
+    "A kids meal with apple juice.",
+    "A chocolate shake.",
+    "The Royal Crispy chicken sandwich."]},
+  {id:"change", icon:"✏️", name:"Changes", phrases:[
+    "No onions, got it.",
+    "Would you like extra pickles?",
+    "Light mayo, okay.",
+    "No ice in the drink, no problem.",
+    "Would you like that with no tomato?",
+    "I can add bacon for an extra charge.",
+    "So that's a Whopper with no mayo and extra ketchup."]},
+  {id:"drink", icon:"🥤", name:"Drinks", phrases:[
+    "We have Coke, Diet Coke, Sprite, and Dr Pepper.",
+    "Would you like sweet tea or unsweet tea?",
+    "Do you want ice in that?",
+    "Our coffee is hot or iced.",
+    "Would you like cream and sugar?",
+    "Sorry, we're out of Dr Pepper right now. Can I get you something else?"]},
+  {id:"pay", icon:"💵", name:"Total and payment", phrases:[
+    "Your total is twelve forty-nine.",
+    "Your total comes to eight dollars and seventy-five cents.",
+    "Please pull up to the first window.",
+    "Please pull around to the second window.",
+    "Will that be cash or card?",
+    "Go ahead and tap or insert your card.",
+    "Here's your change and your receipt.",
+    "Do you have a coupon or are you using the app?"]},
+  {id:"sorry", icon:"🙏", name:"Sorry", phrases:[
+    "I'm sorry about that.",
+    "Sorry for the wait.",
+    "I'm so sorry, let me fix that for you right away.",
+    "I apologize, I'll get you a fresh one.",
+    "Sorry, that will take about three more minutes.",
+    "Can you please pull forward and wait? We'll bring it out to you."]},
+  {id:"thanks", icon:"😊", name:"Thank you", phrases:[
+    "Thank you, have a great day!",
+    "Thanks for coming in.",
+    "You're welcome.",
+    "Enjoy your meal!",
+    "Have a good one!",
+    "Thank you for your patience."]},
+  {id:"clarify", icon:"❓", name:"Say again?", phrases:[
+    "Sorry, could you say that again?",
+    "Could you speak a little slower, please?",
+    "Sorry, I didn't catch that.",
+    "Did you say a Whopper or a Double Whopper?",
+    "Just to confirm, that's one Whopper meal with a Coke?",
+    "Was that a medium or a large?",
+    "Can you repeat the last item, please?",
+    "Let me read your order back to you."]}
+];
+
+/* Customer lines: how real Texas customers talk. sounds = how it sounds fast. */
+const CUSTOMERS = [
+  {en:"Lemme get a number one, no onion.", sounds:"lemme git a number wun, no un-yun", means:"Let me get a number one combo without onions.", reply:"One number one, no onions. What would you like to drink?"},
+  {en:"Y'all got sweet tea?", sounds:"yawl got sweet tea", means:"Do you (all) have sweet tea?", reply:"Yes, we do. What size would you like?"},
+  {en:"Can I get a large Dr Pepper?", sounds:"kin ah git a lahrj doctor pepper", means:"I want a large Dr Pepper.", reply:"A large Dr Pepper. Anything else?"},
+  {en:"Gimme a sec, I'm fixin' to order.", sounds:"gimme a sec, ahm fixin' ta order", means:"Give me a second, I am about to order.", reply:"Take your time, no rush."},
+  {en:"Yes ma'am, that's it.", sounds:"yes mam, thass it", means:"Yes (polite), that is all.", reply:"Okay, your total is nine fifty. Please pull up to the first window."},
+  {en:"I'mma get the chicken fries.", sounds:"ah-muh git the chicken fries", means:"I am going to get the chicken fries.", reply:"Chicken fries. Would you like to make that a meal?"},
+  {en:"I'm finna order for the whole car, y'all ready?", sounds:"ahm finna order fuh the whole car, yawl reddy", means:"I am about to order for everyone in the car. Are you ready?", reply:"Yes, go ahead whenever you're ready."},
+  {en:"Lemme get uh, two Whoppers, both with cheese.", sounds:"lemme git uh, two whoppuhs, both with cheese", means:"I want two Whoppers, both with cheese.", reply:"Two Whoppers with cheese. Would you like to make them meals?"},
+  {en:"Can you hold the mayo on that?", sounds:"kin ya hold the may-oh on that", means:"Please do not put mayonnaise on it.", reply:"No mayo, got it."},
+  {en:"Make it a large.", sounds:"make it a lahrj", means:"I want the large size.", reply:"Large, okay."},
+  {en:"How much y'all charge for a Whopper?", sounds:"how much yawl charge fer a whopper", means:"What is the price of a Whopper?", reply:"A Whopper is six forty-nine, or nine ninety-nine for the meal."},
+  {en:"Lemme get a medium unsweet tea, light ice.", sounds:"lemme git a meedium unsweet tea, lite ahs", means:"Medium tea without sugar, with only a little ice.", reply:"Medium unsweet tea, light ice."},
+  {en:"Nah, that's all, thank ya.", sounds:"nah, thass all, thank ya", means:"No, that is everything. Thank you.", reply:"Thank you! Your total is ten twenty-five at the first window."},
+  {en:"Could I get some extra ketchup in the bag?", sounds:"could ah git sum extra ketchup in the bag", means:"Please put more ketchup packets in my bag.", reply:"Sure, I'll add extra ketchup."},
+  {en:"Ain't y'all got the two for five no more?", sounds:"aint yawl got the two fer fahv no more", means:"Don't you still have the two-for-five-dollar deal?", reply:"Sorry, that deal ended. We do have the value menu."},
+  {en:"Hey, how ya doin'? Lemme get a Croissanwich.", sounds:"hey, how ya doin? lemme git a kruh-SAHN-wich", means:"Hello, how are you? I want a Croissanwich.", reply:"I'm good, thank you! Sausage, egg, and cheese?"},
+  {en:"Is the ice cream machine working?", sounds:"is the ahs cream machine workin", means:"Can you make ice cream right now?", reply:"Yes, it is! What would you like?"},
+  {en:"Sorry, I said no pickles.", sounds:"sorry, ah said no pickles", means:"You made a mistake. I asked for no pickles.", reply:"I'm so sorry, let me fix that for you right away."},
+  {en:"Bless your heart, thank you, darlin'.", sounds:"bless yer hart, thank you, dahlin", means:"Thank you, you are very kind. (Friendly, warm.)", reply:"You're welcome, enjoy your meal!"},
+  {en:"We good, that's it for us.", sounds:"we good, thass it fuh us", means:"We do not need anything else.", reply:"Okay! Please pull up to the first window."}
+];
+
+/* Accent notes: plain, respectful descriptions. */
+const ACCENT = [
+  {t:"Y'all = you all", d:"Almost everyone in Texas says \"y'all\" when talking to you or your team. It is friendly, not rude.", ex:"Y'all open late tonight?"},
+  {t:"Fixin' to / finna = about to", d:"\"I'm fixin' to order\" and \"I'm finna order\" both mean \"I am about to order\". Many Texans use fixin' to; finna is very common in Black Texan speech and with young people.", ex:"I'm finna order for the whole car."},
+  {t:"I'mma = I am going to", d:"Sounds like \"ah-muh\". It means \"I am going to\".", ex:"I'mma get the chicken fries."},
+  {t:"The long I sounds like \"ah\"", d:"In Texas, \"I\" often sounds like \"ah\". Ice sounds like \"ahs\", fries like \"frahz\", nine like \"nahn\", five like \"fahv\".", ex:"Five large fries, light ice."},
+  {t:"Words run together", d:"Fast speakers join words: \"lemme\" (let me), \"gimme\" (give me), \"gonna\" (going to), \"whatcha\" (what do you).", ex:"Lemme get a number one. Gimme a sweet tea."},
+  {t:"Endings get dropped", d:"The last sound often disappears: \"doin'\" (doing), \"thass\" (that's), \"ol'\" (old). Listen for the first part of the word.", ex:"How ya doin'? That's all."},
+  {t:"Ma'am and sir", d:"Customers may call you ma'am, darlin', sweetheart, or honey. In Texas this is polite and normal.", ex:"Yes ma'am, thank you, darlin'."},
+  {t:"Pen and pin sound the same", d:"Many Texans say \"pen\" like \"pin\", and \"ten\" like \"tin\". Use the rest of the sentence to know the number.", ex:"Ten dollars and ten cents."},
+  {t:"Ain't and double no", d:"\"Ain't y'all got...\" means \"Don't you have...\". \"Ain't got no\" means \"don't have any\".", ex:"Ain't y'all got the two for five no more?"},
+  {t:"Uh, um, lemme see", d:"People pause while they read the menu. Wait. You can say: \"Take your time.\"", ex:"Lemme see, uh, gimme a Whopper."}
+];
+
+/* Drive-thru role plays: customer says, you reply. */
+const DIALOGS = [
+  {title:"Simple meal", turns:[
+    {c:"Hey, lemme get a number one.", r:"Sure. What size would you like, small, medium, or large?"},
+    {c:"Make it a large.", r:"What would you like to drink?"},
+    {c:"Dr Pepper.", r:"Anything else for you today?"},
+    {c:"Nah, that's it.", r:"Your total is twelve forty-nine. Please pull up to the first window."}]},
+  {title:"Changes and drinks", turns:[
+    {c:"Y'all got sweet tea?", r:"Yes, we do. What size would you like?"},
+    {c:"Medium. And a Whopper, no onion, extra pickles.", r:"A Whopper with no onions and extra pickles. Would you like to make that a meal?"},
+    {c:"Yeah, go 'head.", r:"Fries or onion rings?"},
+    {c:"Onion rings.", r:"So that's a Whopper meal with onion rings and a medium sweet tea. Anything else?"}]},
+  {title:"Didn't hear", turns:[
+    {c:"Lemme get uh two chicken fries an' a large Coke.", r:"Sorry, could you say that again?"},
+    {c:"Two chicken fries and a large Coke.", r:"Two chicken fries and a large Coke. Do you need any sauce?"},
+    {c:"Ranch, please.", r:"Ranch, okay. Anything else?"},
+    {c:"That's all, thank ya.", r:"Thank you! Your total is ten twenty-five at the first window."}]},
+  {title:"Wrong order", turns:[
+    {c:"Excuse me, I said no pickles on this.", r:"I'm so sorry, let me fix that for you right away."},
+    {c:"How long's it gonna take?", r:"About three minutes. Can you please pull forward and wait?"},
+    {c:"Alright.", r:"Thank you for your patience."}]},
+  {title:"Breakfast", turns:[
+    {c:"Mornin'. Lemme get a Croissanwich, sausage egg and cheese.", r:"Good morning! Would you like to make that a meal?"},
+    {c:"Just a coffee with it.", r:"Hot or iced coffee?"},
+    {c:"Hot. Cream and sugar.", r:"Cream and sugar, okay. Anything else?"},
+    {c:"We good.", r:"Thank you! Please pull around to the second window."}]}
+];
+
+/* ============ URDU ============ */
+const UR = {
+"Welcome to Burger King, what can I get for you today?":"برگر کنگ میں خوش آمدید، آج میں آپ کے لیے کیا لاؤں؟",
+"Hi, how are you doing today?":"ہیلو، آج آپ کیسے ہیں؟",
+"Good morning! What can I get started for you?":"صبح بخیر! آپ کیا لینا چاہیں گے؟",
+"Go ahead whenever you're ready.":"جب آپ تیار ہوں، آرڈر بتائیں۔",
+"Take your time, no rush.":"آرام سے، کوئی جلدی نہیں۔",
+"Hi there, I'll be right with you.":"ہیلو، میں ابھی آپ کے پاس آتی ہوں۔",
+"Thanks for waiting, go ahead with your order.":"انتظار کا شکریہ، اپنا آرڈر بتائیں۔",
+"Would you like to make that a meal?":"کیا آپ اسے میل (فرائز اور ڈرنک کے ساتھ) بنانا چاہیں گے؟",
+"What size would you like, small, medium, or large?":"آپ کو کون سا سائز چاہیے: چھوٹا، درمیانہ یا بڑا؟",
+"Would you like cheese on that?":"کیا آپ اس پر چیز (پنیر) چاہیں گے؟",
+"Do you want fries or onion rings with that?":"اس کے ساتھ فرائز چاہییں یا پیاز کے رِنگ؟",
+"What would you like to drink?":"آپ پینے میں کیا لیں گے؟",
+"Anything else for you today?":"آج آپ کو کچھ اور چاہیے؟",
+"Is that for here or to go?":"یہیں کھائیں گے یا ساتھ لے کر جائیں گے؟",
+"How many would you like?":"آپ کو کتنے چاہییں؟",
+"Would you like to try a dessert today?":"کیا آج آپ کوئی میٹھا لینا چاہیں گے؟",
+"Do you need any sauce with your chicken fries?":"چکن فرائز کے ساتھ کوئی ساس چاہیے؟",
+"We have ketchup, ranch, barbecue, and honey mustard.":"ہمارے پاس کیچپ، رینچ، باربی کیو اور ہنی مسٹرڈ ہے۔",
+"One Whopper meal, medium size.":"ایک وَوپر میل، درمیانہ سائز۔",
+"A Double Whopper with cheese.":"ایک ڈبل وَوپر، چیز کے ساتھ۔",
+"Chicken fries, nine piece.":"چکن فرائز، نو ٹکڑے۔",
+"A small order of onion rings.":"پیاز کے رِنگ، چھوٹا سائز۔",
+"A large Coke and a medium sweet tea.":"ایک بڑی کوک اور ایک درمیانی میٹھی ٹھنڈی چائے۔",
+"A breakfast Croissanwich with sausage, egg, and cheese.":"ناشتے کا کروسانوِچ، ساسیج، انڈے اور چیز کے ساتھ۔",
+"Two cheeseburgers, no pickles.":"دو چیز برگر، اچار کے بغیر۔",
+"A kids meal with apple juice.":"بچوں کا میل، سیب کے جوس کے ساتھ۔",
+"A chocolate shake.":"ایک چاکلیٹ شیک۔",
+"The Royal Crispy chicken sandwich.":"رائل کرسپی چکن سینڈوچ۔",
+"No onions, got it.":"پیاز نہیں، سمجھ گئی۔",
+"Would you like extra pickles?":"کیا آپ کو زیادہ اچار چاہیے؟",
+"Light mayo, okay.":"تھوڑی مایونیز، ٹھیک ہے۔",
+"No ice in the drink, no problem.":"ڈرنک میں برف نہیں، کوئی مسئلہ نہیں۔",
+"Would you like that with no tomato?":"کیا آپ یہ ٹماٹر کے بغیر چاہتے ہیں؟",
+"I can add bacon for an extra charge.":"میں اضافی پیسوں میں بیکن ڈال سکتی ہوں۔",
+"So that's a Whopper with no mayo and extra ketchup.":"تو یہ ایک وَوپر ہے، مایونیز کے بغیر اور زیادہ کیچپ کے ساتھ۔",
+"We have Coke, Diet Coke, Sprite, and Dr Pepper.":"ہمارے پاس کوک، ڈائٹ کوک، سپرائٹ اور ڈاکٹر پیپر ہیں۔",
+"Would you like sweet tea or unsweet tea?":"آپ کو میٹھی ٹھنڈی چائے چاہیے یا بغیر چینی کی؟",
+"Do you want ice in that?":"کیا اس میں برف چاہیے؟",
+"Our coffee is hot or iced.":"ہماری کافی گرم بھی ہے اور ٹھنڈی (برف والی) بھی۔",
+"Would you like cream and sugar?":"کیا آپ کو کریم اور چینی چاہیے؟",
+"Sorry, we're out of Dr Pepper right now. Can I get you something else?":"معاف کیجیے، ابھی ڈاکٹر پیپر ختم ہے۔ کیا میں آپ کو کچھ اور دوں؟",
+"Your total is twelve forty-nine.":"آپ کا کُل بل بارہ ڈالر انچاس سینٹ ہے۔",
+"Your total comes to eight dollars and seventy-five cents.":"آپ کا کُل بل آٹھ ڈالر پچھتر سینٹ ہے۔",
+"Please pull up to the first window.":"براہِ مہربانی پہلی کھڑکی پر آ جائیں۔",
+"Please pull around to the second window.":"براہِ مہربانی گاڑی آگے دوسری کھڑکی پر لے آئیں۔",
+"Will that be cash or card?":"نقد دیں گے یا کارڈ سے؟",
+"Go ahead and tap or insert your card.":"اپنا کارڈ مشین پر لگائیں یا اندر ڈالیں۔",
+"Here's your change and your receipt.":"یہ لیجیے آپ کا بقایا اور رسید۔",
+"Do you have a coupon or are you using the app?":"کیا آپ کے پاس کوپن ہے یا آپ ایپ استعمال کر رہے ہیں؟",
+"I'm sorry about that.":"اس کے لیے معذرت۔",
+"Sorry for the wait.":"انتظار کروانے پر معذرت۔",
+"I'm so sorry, let me fix that for you right away.":"بہت معذرت، میں ابھی آپ کے لیے ٹھیک کر دیتی ہوں۔",
+"I apologize, I'll get you a fresh one.":"معافی چاہتی ہوں، میں آپ کو نیا تازہ لا دیتی ہوں۔",
+"Sorry, that will take about three more minutes.":"معاف کیجیے، اس میں تقریباً تین منٹ اور لگیں گے۔",
+"Can you please pull forward and wait? We'll bring it out to you.":"کیا آپ گاڑی تھوڑا آگے کر کے انتظار کریں گے؟ ہم آپ کو باہر لا کر دیں گے۔",
+"Thank you, have a great day!":"شکریہ، آپ کا دن اچھا گزرے!",
+"Thanks for coming in.":"آنے کا شکریہ۔",
+"You're welcome.":"کوئی بات نہیں۔",
+"Enjoy your meal!":"کھانے کا مزہ لیں!",
+"Have a good one!":"خوش رہیں، دن اچھا گزرے!",
+"Thank you for your patience.":"انتظار کرنے کا شکریہ۔",
+"Sorry, could you say that again?":"معاف کیجیے، کیا آپ دوبارہ بتا سکتے ہیں؟",
+"Could you speak a little slower, please?":"براہِ مہربانی تھوڑا آہستہ بولیں۔",
+"Sorry, I didn't catch that.":"معاف کیجیے، مجھے سمجھ نہیں آیا۔",
+"Did you say a Whopper or a Double Whopper?":"آپ نے وَوپر کہا یا ڈبل وَوپر؟",
+"Just to confirm, that's one Whopper meal with a Coke?":"تصدیق کے لیے: ایک وَوپر میل، کوک کے ساتھ؟",
+"Was that a medium or a large?":"وہ درمیانہ تھا یا بڑا؟",
+"Can you repeat the last item, please?":"براہِ مہربانی آخری چیز دوبارہ بتائیں۔",
+"Let me read your order back to you.":"میں آپ کا آرڈر دوبارہ پڑھ کر سناتی ہوں۔",
+/* customer meanings */
+"Let me get a number one combo without onions.":"مجھے نمبر ایک کومبو دیں، پیاز کے بغیر۔",
+"Do you (all) have sweet tea?":"کیا آپ کے پاس میٹھی ٹھنڈی چائے ہے؟",
+"I want a large Dr Pepper.":"مجھے ایک بڑا ڈاکٹر پیپر چاہیے۔",
+"Give me a second, I am about to order.":"ایک سیکنڈ رکیں، میں آرڈر کرنے والا ہوں۔",
+"Yes (polite), that is all.":"جی ہاں، بس اتنا ہی۔",
+"I am going to get the chicken fries.":"میں چکن فرائز لوں گا۔",
+"I am about to order for everyone in the car. Are you ready?":"میں گاڑی میں سب کے لیے آرڈر کرنے لگا ہوں، کیا آپ تیار ہیں؟",
+"I want two Whoppers, both with cheese.":"مجھے دو وَوپر چاہییں، دونوں چیز کے ساتھ۔",
+"Please do not put mayonnaise on it.":"اس پر مایونیز نہ ڈالیں۔",
+"I want the large size.":"مجھے بڑا سائز چاہیے۔",
+"What is the price of a Whopper?":"وَوپر کی قیمت کیا ہے؟",
+"Medium tea without sugar, with only a little ice.":"درمیانی چائے بغیر چینی کے، تھوڑی سی برف کے ساتھ۔",
+"No, that is everything. Thank you.":"نہیں، بس یہی سب ہے۔ شکریہ۔",
+"Please put more ketchup packets in my bag.":"میرے بیگ میں کیچپ کے زیادہ پیکٹ ڈال دیں۔",
+"Don't you still have the two-for-five-dollar deal?":"کیا اب پانچ ڈالر میں دو والی ڈیل نہیں ہے؟",
+"Hello, how are you? I want a Croissanwich.":"ہیلو، آپ کیسی ہیں؟ مجھے ایک کروسانوِچ چاہیے۔",
+"Can you make ice cream right now?":"کیا ابھی آئس کریم مل سکتی ہے؟",
+"You made a mistake. I asked for no pickles.":"غلطی ہو گئی ہے۔ میں نے اچار کے بغیر کہا تھا۔",
+"Thank you, you are very kind. (Friendly, warm.)":"شکریہ، آپ بہت مہربان ہیں۔ (پیار سے کہا گیا)",
+"We do not need anything else.":"ہمیں اور کچھ نہیں چاہیے۔",
+/* replies */
+"One number one, no onions. What would you like to drink?":"ایک نمبر ایک، پیاز کے بغیر۔ آپ پینے میں کیا لیں گے؟",
+"Yes, we do. What size would you like?":"جی ہاں، ہے۔ آپ کو کون سا سائز چاہیے؟",
+"A large Dr Pepper. Anything else?":"ایک بڑا ڈاکٹر پیپر۔ کچھ اور؟",
+"Okay, your total is nine fifty. Please pull up to the first window.":"ٹھیک ہے، آپ کا بل نو ڈالر پچاس سینٹ ہے۔ براہِ مہربانی پہلی کھڑکی پر آ جائیں۔",
+"Chicken fries. Would you like to make that a meal?":"چکن فرائز۔ کیا آپ اسے میل بنانا چاہیں گے؟",
+"Yes, go ahead whenever you're ready.":"جی، جب آپ تیار ہوں بتائیں۔",
+"Two Whoppers with cheese. Would you like to make them meals?":"دو وَوپر چیز کے ساتھ۔ کیا آپ انہیں میل بنانا چاہیں گے؟",
+"No mayo, got it.":"مایونیز نہیں، سمجھ گئی۔",
+"Large, okay.":"بڑا، ٹھیک ہے۔",
+"A Whopper is six forty-nine, or nine ninety-nine for the meal.":"وَوپر چھ ڈالر انچاس سینٹ کا ہے، اور میل نو ڈالر ننانوے سینٹ کا۔",
+"Medium unsweet tea, light ice.":"درمیانی بغیر چینی کی چائے، تھوڑی برف۔",
+"Thank you! Your total is ten twenty-five at the first window.":"شکریہ! پہلی کھڑکی پر آپ کا بل دس ڈالر پچیس سینٹ ہے۔",
+"Sure, I'll add extra ketchup.":"ضرور، میں زیادہ کیچپ ڈال دیتی ہوں۔",
+"Sorry, that deal ended. We do have the value menu.":"معاف کیجیے، وہ ڈیل ختم ہو گئی۔ ہمارے پاس سستا (ویلیو) مینو ہے۔",
+"I'm good, thank you! Sausage, egg, and cheese?":"میں ٹھیک ہوں، شکریہ! ساسیج، انڈہ اور چیز والا؟",
+"Yes, it is! What would you like?":"جی ہاں، مل سکتی ہے! آپ کیا لیں گے؟",
+"You're welcome, enjoy your meal!":"کوئی بات نہیں، کھانے کا مزہ لیں!",
+"Okay! Please pull up to the first window.":"ٹھیک ہے! براہِ مہربانی پہلی کھڑکی پر آ جائیں۔",
+/* role plays */
+"Hey, lemme get a number one.":"ہیلو، مجھے نمبر ایک دیں۔",
+"Sure. What size would you like, small, medium, or large?":"ضرور۔ آپ کو کون سا سائز چاہیے: چھوٹا، درمیانہ یا بڑا؟",
+"Make it a large.":"بڑا کر دیں۔",
+"Dr Pepper.":"ڈاکٹر پیپر۔",
+"Nah, that's it.":"نہیں، بس اتنا ہی۔",
+"Your total is twelve forty-nine. Please pull up to the first window.":"آپ کا بل بارہ ڈالر انچاس سینٹ ہے۔ براہِ مہربانی پہلی کھڑکی پر آ جائیں۔",
+"Y'all got sweet tea?":"کیا آپ کے پاس میٹھی ٹھنڈی چائے ہے؟",
+"Medium. And a Whopper, no onion, extra pickles.":"درمیانی۔ اور ایک وَوپر، پیاز کے بغیر، زیادہ اچار۔",
+"A Whopper with no onions and extra pickles. Would you like to make that a meal?":"ایک وَوپر، پیاز کے بغیر اور زیادہ اچار کے ساتھ۔ کیا آپ اسے میل بنانا چاہیں گے؟",
+"Yeah, go 'head.":"ہاں، بنا دیں۔",
+"Fries or onion rings?":"فرائز یا پیاز کے رِنگ؟",
+"Onion rings.":"پیاز کے رِنگ۔",
+"So that's a Whopper meal with onion rings and a medium sweet tea. Anything else?":"تو یہ ایک وَوپر میل ہے، پیاز کے رِنگ اور درمیانی میٹھی چائے کے ساتھ۔ کچھ اور؟",
+"Lemme get uh two chicken fries an' a large Coke.":"مجھے دو چکن فرائز اور ایک بڑی کوک دیں۔",
+"Two chicken fries and a large Coke.":"دو چکن فرائز اور ایک بڑی کوک۔",
+"Two chicken fries and a large Coke. Do you need any sauce?":"دو چکن فرائز اور ایک بڑی کوک۔ کوئی ساس چاہیے؟",
+"Ranch, please.":"رینچ، براہِ مہربانی۔",
+"Ranch, okay. Anything else?":"رینچ، ٹھیک ہے۔ کچھ اور؟",
+"That's all, thank ya.":"بس اتنا ہی، شکریہ۔",
+"Excuse me, I said no pickles on this.":"معاف کیجیے، میں نے اس پر اچار نہ ڈالنے کا کہا تھا۔",
+"How long's it gonna take?":"اس میں کتنی دیر لگے گی؟",
+"About three minutes. Can you please pull forward and wait?":"تقریباً تین منٹ۔ کیا آپ گاڑی آگے کر کے انتظار کریں گے؟",
+"Alright.":"ٹھیک ہے۔",
+"Mornin'. Lemme get a Croissanwich, sausage egg and cheese.":"صبح بخیر۔ مجھے ایک کروسانوِچ دیں، ساسیج، انڈہ اور چیز والا۔",
+"Good morning! Would you like to make that a meal?":"صبح بخیر! کیا آپ اسے میل بنانا چاہیں گے؟",
+"Just a coffee with it.":"اس کے ساتھ صرف ایک کافی۔",
+"Hot or iced coffee?":"گرم کافی یا ٹھنڈی؟",
+"Hot. Cream and sugar.":"گرم۔ کریم اور چینی کے ساتھ۔",
+"Cream and sugar, okay. Anything else?":"کریم اور چینی، ٹھیک ہے۔ کچھ اور؟",
+"We good.":"بس، ہمیں اور کچھ نہیں چاہیے۔",
+"Thank you! Please pull around to the second window.":"شکریہ! براہِ مہربانی دوسری کھڑکی پر آ جائیں۔"
+};
+const CAT_UR={greet:"سلام دعا",order:"آرڈر لینا",menu:"مینو کے الفاظ",change:"تبدیلیاں",drink:"مشروبات",pay:"بل اور ادائیگی",sorry:"معذرت",thanks:"شکریہ",clarify:"دوبارہ پوچھنا"};
+const STEP_UR={learn:"نئے جملے سیکھیں",ears:"گاہکوں کو سنیں",speak:"بولیں اور دہرائیں",drive:"ڈرائیو تھرو کی مشق",review:"دہرائی"};
+const ACCENT_UR=[
+["Y'all یعنی «آپ سب»","ٹیکساس میں تقریباً سب لوگ آپ یا آپ کی ٹیم سے بات کرتے ہوئے y'all کہتے ہیں۔ یہ دوستانہ لفظ ہے، بدتمیزی نہیں۔"],
+["Fixin' to / finna یعنی «کرنے والا ہوں»","I'm fixin' to order اور I'm finna order دونوں کا مطلب ہے «میں آرڈر کرنے والا ہوں»۔ fixin' to بہت سے ٹیکسن کہتے ہیں؛ finna سیاہ فام ٹیکسن اور نوجوانوں میں بہت عام ہے۔"],
+["I'mma یعنی «میں ... کروں گا»","یہ «آ مَہ» جیسا سنائی دیتا ہے۔ مطلب: I am going to۔"],
+["لمبی «آئی» کی آواز «آ» بن جاتی ہے","ٹیکساس میں I اکثر «آ» سنائی دیتا ہے: ice جیسے «آس»، fries جیسے «فراز»، nine جیسے «نان»، five جیسے «فاو»۔"],
+["الفاظ آپس میں جڑ جاتے ہیں","تیز بولنے والے الفاظ ملا دیتے ہیں: lemme (let me)، gimme (give me)، gonna (going to)، whatcha (what do you)۔"],
+["آخری آواز گر جاتی ہے","لفظ کا آخری حصہ اکثر غائب ہو جاتا ہے: doin' (doing)، thass (that's)۔ لفظ کے پہلے حصے پر دھیان دیں۔"],
+["Ma'am اور sir","گاہک آپ کو ma'am، darlin'، sweetheart یا honey کہہ سکتے ہیں۔ ٹیکساس میں یہ عزت اور پیار کا عام انداز ہے۔"],
+["Pen اور pin ایک جیسے","بہت سے ٹیکسن pen کو pin اور ten کو tin جیسا بولتے ہیں۔ پورے جملے سے نمبر سمجھیں۔"],
+["Ain't اور دوہرا «نہیں»","Ain't y'all got... کا مطلب ہے «کیا آپ کے پاس ... نہیں ہے؟»۔ Ain't got no کا مطلب ہے «بالکل نہیں ہے»۔"],
+["Uh, um, lemme see","لوگ مینو پڑھتے ہوئے رکتے ہیں۔ انتظار کریں۔ آپ کہہ سکتی ہیں: Take your time۔"]
+];
+function urOn(){ return S.ur!==false; }
+function urT(s){ return urOn() && s ? `<div class="ur" lang="ur" dir="rtl">${esc(s)}</div>` : ""; }
+function ur(en){ return urT(UR[en]); }
+
+/* ============ DATA MODEL ============ */
+const ALLP = []; CATS.forEach(c=>c.phrases.forEach((en,i)=>ALLP.push({id:"p:"+c.id+i,cat:c.id,en})));
+const ALLC = CUSTOMERS.map((c,i)=>({...c,id:"c:"+i}));
+const BYID = {}; ALLP.forEach(p=>BYID[p.id]=p); ALLC.forEach(c=>BYID[c.id]=c);
+const GAPS = [0,1,2,4,7,14,30]; // days per box (spaced repetition)
+const DAY_GOAL = 30*60;
+
+const KEY="dte-v1";
+let S = load();
+function load(){ let s=null; try{s=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  return Object.assign({cards:{},days:{},rate:1,voice:"",dialog:0},s||{}); }
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){} }
+function dkey(d=new Date()){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function today(){ const k=dkey(); if(!S.days[k]) S.days[k]={sec:0,done:[]}; return S.days[k]; }
+function isDue(id){ const c=S.cards[id]; return c && c.due<=Date.now(); }
+function seen(id){ return !!S.cards[id]; }
+function grade(id,ok){
+  const c=S.cards[id]||{box:0,due:0,n:0};
+  c.n=(c.n||0)+1;
+  c.box = ok ? Math.min(c.box+1,GAPS.length-1) : 0;
+  const d=new Date(); d.setHours(4,0,0,0); d.setDate(d.getDate()+GAPS[c.box]);
+  c.due = ok ? d.getTime() : Date.now();
+  S.cards[id]=c; save();
+}
+function shuffle(a){ a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]} return a; }
+function pick(pool,n){
+  const due=shuffle(pool.filter(x=>isDue(x.id))).sort((a,b)=>S.cards[a.id].box-S.cards[b.id].box);
+  const fresh=pool.filter(x=>!seen(x.id));
+  return [...due,...fresh].slice(0,n);
+}
+
+/* ============ TIME TRACKING ============ */
+let lastTouch=Date.now();
+["pointerdown","keydown"].forEach(e=>addEventListener(e,()=>lastTouch=Date.now(),{passive:true}));
+setInterval(()=>{
+  if(document.visibilityState!=="visible") return;
+  if(Date.now()-lastTouch>120000 && !speaking) return;
+  const td=today(); td.sec++; if(td.sec%10===0) save();
+  if(td.sec-(td.roundStart||0)===DAY_GOAL) toast("🎉 30 minutes done! Session completed.");
+  const m=document.getElementById("mins"); if(m) paintTodayNumbers();
+},1000);
+addEventListener("visibilitychange",save);
+
+/* ============ VOICE OUT ============ */
+let voices=[]; let speaking=false;
+function loadVoices(){
+  if(!("speechSynthesis" in window)) return;
+  const all=speechSynthesis.getVoices();
+  voices=all.filter(v=>/^en[-_]US/i.test(v.lang));
+  if(!voices.length) voices=all.filter(v=>/^en/i.test(v.lang));
+}
+if("speechSynthesis" in window){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
+function voiceFor(kind){
+  if(!voices.length) return null;
+  const chosen=voices.find(v=>v.name===S.voice);
+  if(kind==="me") return chosen||voices[0];
+  // customers: use a different voice than "me" so it feels like another person
+  const others=voices.filter(v=>v!==(chosen||voices[0]));
+  return others.length? others[Math.floor(Math.random()*others.length)] : (chosen||voices[0]);
+}
+let ttsCap=null;
+function say(text,{rate=S.rate,kind="me"}={}){
+  return new Promise(res=>{
+    if("speechSynthesis" in window){
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(text);
+      const v=voiceFor(kind); if(v){u.voice=v;u.lang=v.lang}else u.lang="en-US";
+      u.rate=rate; speaking=true;
+      u.onend=u.onerror=()=>{speaking=false;res()};
+      speechSynthesis.speak(u);
+      setTimeout(()=>{speaking=false;res()},Math.max(4000,text.length*160/rate));
+    } else if(ttsCap){
+      ttsCap.speak(text,{rate:Math.max(.7,Math.min(1.5,rate)),language:"en"}).catch(()=>{}).finally(res);
+    } else { toast("This phone cannot read aloud. Try Chrome or Safari."); res(); }
+  });
+}
+
+/* ============ MICROPHONE ============ */
+let dict=null;
+const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
+(async()=>{ await null; try{ if(window.claude?.use){ dict=await window.claude.use("dictation"); ttsCap=await window.claude.use("tts"); } }catch(e){} if(typeof view!=="undefined"&&view==="today") render(); })();
+function micAvailable(){ return !!(dict||SR); }
+
+let micStop=null;
+function listen(onPartial){
+  // Must be called directly from a tap.
+  return new Promise((resolve)=>{
+    if("speechSynthesis" in window) speechSynthesis.cancel();
+    if(dict){
+      let text="", partial="", timer=null, done=false;
+      const fin=()=>{ if(done) return; done=true; offs.forEach(f=>f&&f()); micStop=null; resolve((text+" "+partial).trim()); };
+      const stop=()=>{ clearTimeout(timer); dict.stop().catch(()=>{}).finally(fin); };
+      const quiet=()=>{ clearTimeout(timer); timer=setTimeout(stop,1800); };
+      const offs=[
+        dict.onPartial(({text:t})=>{partial=t; onPartial&&onPartial((text+" "+t).trim()); quiet();}),
+        dict.onFinal(({text:t})=>{text=(text+" "+t).trim(); partial=""; onPartial&&onPartial(text); quiet();}),
+        dict.onState(({state})=>{ if(state==="idle") fin(); })
+      ];
+      micStop=stop;
+      dict.start({language:"en"}).then(()=>{timer=setTimeout(stop,8000)}).catch(err=>{
+        if(err?.code==="not_granted") toast("Microphone is off. You can still say it out loud.");
+        fin();
+      });
+      return;
+    }
+    if(SR){
+      const r=new SR(); r.lang="en-US"; r.interimResults=true; r.maxAlternatives=1; r.continuous=false;
+      let best="";
+      r.onresult=e=>{ best=Array.from(e.results).map(x=>x[0].transcript).join(" "); onPartial&&onPartial(best); };
+      r.onerror=e=>{ if(e.error==="not-allowed") toast("Please allow the microphone for this app."); };
+      r.onend=()=>{ micStop=null; resolve(best.trim()); };
+      micStop=()=>{ try{r.stop()}catch(e){} };
+      try{ r.start(); }catch(e){ resolve(""); }
+      return;
+    }
+    resolve(null);
+  });
+}
+
+/* ============ COMPARE ============ */
+const CONTR={"i'm":"i am","you're":"you are","we're":"we are","that's":"that is","what's":"what is","it's":"it is","here's":"here is","let's":"let us","can't":"can not","cannot":"can not","don't":"do not","didn't":"did not","i'll":"i will","we'll":"we will","won't":"will not","y'all":"you all","ya'll":"you all","ok":"okay","mayo":"mayo","dr":"doctor","bbq":"barbecue"};
+const NUM={"1":"one","2":"two","3":"three","4":"four","5":"five","6":"six","7":"seven","8":"eight","9":"nine","10":"ten","12":"twelve","49":"forty nine","75":"seventy five"};
+function norm(s){
+  return s.toLowerCase().replace(/[’`]/g,"'").replace(/[^a-z0-9' ]+/g," ").split(/\s+/).filter(Boolean)
+    .flatMap(w=>{ w=CONTR[w]||NUM[w]||w; return w.split(" "); }).map(w=>w.replace(/'/g,"")).filter(Boolean);
+}
+function compare(target,heard){
+  const t=norm(target), h=norm(heard);
+  const dp=Array.from({length:t.length+1},()=>new Array(h.length+1).fill(0));
+  for(let i=t.length-1;i>=0;i--)for(let j=h.length-1;j>=0;j--)
+    dp[i][j]= t[i]===h[j] ? dp[i+1][j+1]+1 : Math.max(dp[i+1][j],dp[i][j+1]);
+  const ok=new Set(); let i=0,j=0;
+  while(i<t.length&&j<h.length){ if(t[i]===h[j]){ok.add(i);i++;j++} else if(dp[i+1][j]>=dp[i][j+1]) i++; else j++; }
+  // map back to display words
+  const disp=target.split(/\s+/); let k=0;
+  const html=disp.map(w=>{ const n=norm(w).length||0; let good=true; for(let x=0;x<n;x++){ if(!ok.has(k+x)) good=false; } k+=n;
+    return `<span class="${good?'w-ok':'w-miss'}">${esc(w)}</span>`; }).join(" ");
+  const score=t.length? Math.round(ok.size/t.length*100):0;
+  return {score,html};
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+/* ============ UI HELPERS ============ */
+const $v=document.getElementById("view");
+let view="today", sess=null;
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>t.hidden=true,3000); }
+function setTab(tab){ view=tab; sess=null; if(micStop) micStop(); render(); scrollTo(0,0); }
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+function fmtMin(sec){ return Math.floor(sec/60); }
+function streak(){ let n=0; const d=new Date(); if(!(S.days[dkey(d)]?.sec>=DAY_GOAL)) d.setDate(d.getDate()-1);
+  while(S.days[dkey(d)]?.sec>=DAY_GOAL){ n++; d.setDate(d.getDate()-1); } return n; }
+
+/* ============ TODAY ============ */
+const STEPS=[
+  {id:"learn", icon:"🆕", name:"Learn new phrases", info:"Listen, then say them. 5 min", start:()=>speakSession(pickNew(6),"Learn new phrases")},
+  {id:"ears", icon:"👂", name:"Hear customers", info:"Texas voices, fast and slow. 8 min", start:()=>listenSession(pick(ALLC,8),"Hear customers")},
+  {id:"speak", icon:"🎤", name:"Speak and repeat", info:"Say it into the microphone. 8 min", start:()=>speakSession(pickPractice(8),"Speak and repeat")},
+  {id:"drive", icon:"🚗", name:"Drive-thru practice", info:"Answer a customer. 5 min", start:()=>dialogSession()},
+  {id:"review", icon:"🔁", name:"Review", info:"Old phrases so you don't forget. 4 min", start:()=>reviewSession()}
+];
+function pickNew(n){ const f=ALLP.filter(p=>!seen(p.id)); return (f.length?f:shuffle(ALLP)).slice(0,n); }
+function pickPractice(n){
+  const learned=ALLP.filter(p=>seen(p.id)).sort((a,b)=>S.cards[a.id].box-S.cards[b.id].box||S.cards[a.id].due-S.cards[b.id].due);
+  const list=[...learned.slice(0,n)]; if(list.length<n) list.push(...pickNew(n-list.length).filter(p=>!list.includes(p)));
+  return shuffle(list);
+}
+function reviewSession(){
+  let due=shuffle([...ALLP,...ALLC].filter(x=>isDue(x.id))).slice(0,12);
+  if(!due.length){ due=shuffle([...ALLP,...ALLC].filter(x=>seen(x.id))).slice(0,8); }
+  if(!due.length){ toast("Nothing to review yet. Start with Learn new phrases."); return; }
+  startSession(due.map(x=>({type:x.id.startsWith("c:")?"listen":"speak",item:x})),"Review","review");
+}
+function paintTodayNumbers(){
+  const d=today(); const m=document.getElementById("mins"); if(!m) return;
+  const cur=d.sec-(d.roundStart||0);
+  m.textContent=fmtMin(cur); document.getElementById("minbar").style.width=Math.min(100,cur/DAY_GOAL*100)+"%";
+}
+function renderToday(){
+  const d=today(); const dueN=[...ALLP,...ALLC].filter(x=>isDue(x.id)).length;
+  const next=STEPS.find(s=>!d.done.includes(s.id));
+  $v.innerHTML=`
+    <h1>Hi! Let's practice.</h1>${(d.rounds||1)>1?`<p class="sub">Round ${d.rounds} today · ${fmtMin(d.sec)} min in total</p>`:""}
+    <div class="card">
+      <div class="ring"><div class="num"><span id="mins">0</span><small style="font-size:18px;color:var(--soft)"> / 30 min</small></div>
+      <div style="margin-left:auto;text-align:right"><b style="font-size:22px">🔥 ${streak()}</b><div class="note">days in a row</div></div></div>
+      <div class="bar"><i id="minbar"></i></div>
+      ${!micAvailable()?`<p class="note">This phone or browser can't use the microphone here. You can still say each phrase out loud and rate yourself. Chrome on Android or Safari on iPhone works best.</p>`:""}
+    </div>
+    ${next?`<button class="big primary" id="go">▶ Start: ${esc(next.name)}</button>`:`<div class="card"><h2>All 5 steps done today 🎉</h2><p class="sub">Want more? Start another 30 minutes.</p><button class="big primary" id="again30">↻ Do today again (30 min)</button></div>`}
+    ${STEPS.map(s=>`<button class="step ${d.done.includes(s.id)?"done":""}" data-step="${s.id}">
+      <span class="ic">${s.icon}</span><span class="tx"><b>${s.name}</b>${urT(STEP_UR[s.id])}<span>${s.id==="review"&&dueN?dueN+" waiting · ":""}${s.info}</span></span>
+      <span class="chk">${d.done.includes(s.id)?"✔":"○"}</span></button>`).join("")}
+    ${next?`<div id="againbox"><button class="big ghost" id="againAsk">↻ Start today's 30 minutes again</button></div>`:""}
+    <button class="big ghost" id="sessBtn">📅 My sessions · ✔ ${sessStats().full} done · ⏳ ${sessStats().part} not finished</button>
+    <p class="note">Tip: use headphones. Practice in a quiet place. Say everything out loud, even when the app doesn't listen.</p>`;
+  paintTodayNumbers();
+  if(next) document.getElementById("go").onclick=()=>next.start();
+  const again=()=>{ (d.hist=d.hist||[]).push({sec:d.sec-(d.roundStart||0),steps:d.done.length}); d.done=[]; d.roundStart=d.sec; d.rounds=(d.rounds||1)+1; save(); render(); scrollTo(0,0); toast("New round started. Your total minutes are kept."); };
+  document.getElementById("sessBtn").onclick=()=>{view="sessions";render();scrollTo(0,0)};
+  const a30=document.getElementById("again30"); if(a30) a30.onclick=again;
+  const ask=document.getElementById("againAsk"); if(ask) ask.onclick=()=>{ document.getElementById("againbox").innerHTML=`<div class="card"><b>Start again from step 1?</b><p class="note">The timer starts at 0 for a new 30 minutes. Your progress and total minutes are kept.</p><div class="row"><button class="big ghost" id="aNo">Cancel</button><button class="big primary" id="aYes">Yes, start again</button></div></div>`;
+    document.getElementById("aNo").onclick=render; document.getElementById("aYes").onclick=again; };
+  $v.querySelectorAll("[data-step]").forEach(b=>b.onclick=()=>STEPS.find(s=>s.id===b.dataset.step).start());
+}
+
+/* ============ SESSIONS ============ */
+function speakSession(list,title){ startSession(list.map(p=>({type:"speak",item:p})),title,title.startsWith("Learn")?"learn":"speak"); }
+function listenSession(list,title){ startSession(list.map(c=>({type:"listen",item:c})),title,"ears"); }
+function dialogSession(){
+  const d=DIALOGS[S.dialog%DIALOGS.length]; S.dialog++; save();
+  startSession(d.turns.map(t=>({type:"dialog",item:t,title:d.title})),"Drive-thru: "+d.title,"drive");
+}
+function startSession(queue,title,stepId){ sess={queue,i:0,title,stepId,good:0}; view="session"; render(); }
+function finishSession(){
+  const d=today(); if(sess.stepId && !d.done.includes(sess.stepId)) d.done.push(sess.stepId); save();
+  const g=sess.good, n=sess.queue.length;
+  $v.innerHTML=`<div class="card" style="text-align:center;padding:28px 16px"><div style="font-size:56px">🎉</div><h1>Great job!</h1>
+    <p class="sub">${g} of ${n} were good.</p></div>
+    <button class="big primary" id="home">Back to today</button>`;
+  document.getElementById("home").onclick=()=>setTab("today");
+  sess=null; view="done";
+}
+function nextItem(ok){
+  const it=sess.queue[sess.i];
+  if(ok!==undefined && it.type!=="dialog"){ grade(it.item.id,ok); if(ok) sess.good++; }
+  else if(ok) sess.good++;
+  if(ok===false && it.type!=="dialog" && !it.again){ sess.queue.push({...it,again:true}); } // try once more at the end
+  sess.i++; if(sess.i>=sess.queue.length) finishSession(); else render();
+}
+function topBar(){ return `<div class="top"><button class="back" id="back" aria-label="Back">←</button><h2>${esc(sess.title)}</h2><span class="count">${sess.i+1} / ${sess.queue.length}</span></div>
+  <div class="bar"><i style="width:${sess.i/sess.queue.length*100}%"></i></div>`; }
+function renderSession(){
+  const it=sess.queue[sess.i];
+  if(it.type==="speak") renderSpeak(it.item);
+  else if(it.type==="listen") renderListen(it.item);
+  else renderDialog(it);
+  document.getElementById("back").onclick=()=>setTab("today");
+}
+function micBlock(target,onResult){
+  return { html: micAvailable()
+    ? `<button class="big mic" id="mic">🎤 Tap and say it</button><div id="res"></div>`
+    : `<div class="tip">Say it out loud 3 times. Then choose.</div><div class="row"><button class="big ghost" id="selfno">😕 Hard</button><button class="big primary" id="selfok">👍 I said it</button></div>`,
+  wire(){
+    const mic=document.getElementById("mic");
+    if(!mic){ document.getElementById("selfno").onclick=()=>onResult(null,false); document.getElementById("selfok").onclick=()=>onResult(null,true); return; }
+    const res=document.getElementById("res");
+    mic.onclick=()=>{
+      if(micStop){ micStop(); return; }
+      mic.classList.add("on"); mic.textContent="⏹ Listening… tap when done";
+      res.innerHTML=`<p class="heard">…</p>`;
+      listen(t=>{ res.innerHTML=`<p class="heard">“${esc(t)}”</p>`; }).then(heard=>{
+        mic.classList.remove("on"); mic.textContent="🎤 Try again";
+        if(heard===null) return;
+        if(!heard){ res.innerHTML=`<div class="tip">I didn't hear anything. Speak a little louder and closer to the phone.</div>`; return; }
+        const c=compare(target,heard);
+        const msg=c.score>=90?"Excellent! 🌟":c.score>=70?"Good! Almost there.":c.score>=40?"Keep going. Listen slow, then try again.":"Listen 🐢 slow first, then try again.";
+        res.innerHTML=`<div class="card" style="gap:8px"><div class="score">${c.score}% · ${msg}</div><div class="words">${c.html}</div><p class="heard">I heard: “${esc(heard)}”</p>
+          ${c.score<90?`<p class="note">Orange words were missed. Say those slowly.</p>`:""}</div>`;
+        onResult(c.score,c.score>=70);
+      });
+    };
+  }};
+}
+function renderSpeak(p){
+  const cat=CATS.find(c=>c.id===p.cat);
+  const mb=micBlock(p.en,(score,ok)=>{ last=ok; showNext(); });
+  let last=null;
+  $v.innerHTML=`${topBar()}
+    <div class="card"><span class="label">${cat.icon} ${esc(cat.name)} · You say</span>
+      <div class="phrase">${esc(p.en)}</div>${ur(p.en)}
+      <div class="row"><button class="big ghost" id="play">🔊 Listen</button><button class="big ghost" id="slow">🐢 Slow</button></div>
+    </div>
+    ${mb.html}
+    <div class="row" id="nav" hidden><button class="big ghost" id="no">😕 Again later</button><button class="big primary" id="ok">Next ➜</button></div>`;
+  document.getElementById("play").onclick=()=>say(p.en);
+  document.getElementById("slow").onclick=()=>say(p.en,{rate:.65});
+  mb.wire();
+  function showNext(){ document.getElementById("nav").hidden=false;
+    document.getElementById("ok").textContent = last===false ? "Next anyway ➜" : "Next ➜";
+    document.getElementById("ok").onclick=()=>nextItem(last!==false);
+    document.getElementById("no").onclick=()=>nextItem(false);
+    if(last===null) nextItem(true); }
+  // If no mic: self-rating buttons go straight to next.
+  if(!micAvailable()){ document.getElementById("selfok").onclick=()=>nextItem(true); document.getElementById("selfno").onclick=()=>nextItem(false); }
+  setTimeout(()=>say(p.en),250);
+}
+function renderListen(c){
+  $v.innerHTML=`${topBar()}
+    <div class="card"><span class="label">👤 Customer says</span>
+      <div class="row3"><button class="big primary" id="fast">🔊 Fast</button><button class="big ghost" id="norm">Normal</button><button class="big ghost" id="slow">🐢 Slow</button></div>
+      <div id="reveal"><button class="hidebox" id="show" style="width:100%">👀 Show the words</button></div>
+    </div>
+    <div class="row" id="nav" hidden><button class="big ghost" id="no">😕 Not yet</button><button class="big primary" id="ok">👍 I got it</button></div>`;
+  document.getElementById("fast").onclick=()=>say(c.en,{rate:1.25,kind:"cust"});
+  document.getElementById("norm").onclick=()=>say(c.en,{rate:1,kind:"cust"});
+  document.getElementById("slow").onclick=()=>say(c.en,{rate:.65,kind:"cust"});
+  document.getElementById("show").onclick=()=>{
+    document.getElementById("reveal").innerHTML=`
+      <div class="phrase">${esc(c.en)}</div>
+      <div><span class="label">Sounds like</span><div class="sounds">“${esc(c.sounds)}”</div></div>
+      <div><span class="label">Means</span><div class="means">${esc(c.means)}</div>${ur(c.means)}</div>
+      <div class="tip"><span class="label">You can say</span><div style="font-size:19px;font-weight:600">${esc(c.reply)}</div>${ur(c.reply)}
+        <button class="big ghost" id="rep" style="margin-top:8px;min-height:52px;font-size:17px">🔊 Hear the answer</button></div>`;
+    document.getElementById("rep").onclick=()=>say(c.reply);
+    document.getElementById("nav").hidden=false;
+    document.getElementById("ok").onclick=()=>nextItem(true);
+    document.getElementById("no").onclick=()=>nextItem(false);
+  };
+  setTimeout(()=>say(c.en,{rate:1.1,kind:"cust"}),250);
+}
+function renderDialog(it){
+  const t=it.item;
+  const mb=micBlock(t.r,(score,ok)=>{ show(ok); });
+  $v.innerHTML=`${topBar()}
+    <div class="card"><div class="cust"><span class="who">🚗</span><div style="flex:1;min-width:0"><span class="label">Customer</span>
+      <div class="row" style="margin-top:6px"><button class="big ghost" id="again">🔊 Again</button><button class="big ghost" id="slow">🐢 Slow</button></div>
+      <div id="ctext"><button class="hidebox" id="showc" style="width:100%;margin-top:8px">👀 Show words</button></div></div></div></div>
+    <div class="card"><span class="label">🧑‍🍳 Your answer</span><p class="sub">Answer the customer. Use your own words, or tap 💡.</p>
+      <button class="big ghost" id="hint">💡 Show a good answer</button><div id="hintbox"></div></div>
+    ${mb.html}
+    <div class="row" id="nav" hidden><button class="big ghost" id="redo">↺ Try again</button><button class="big primary" id="ok">Next ➜</button></div>`;
+  const playC=(r)=>say(t.c,{rate:r,kind:"cust"});
+  document.getElementById("again").onclick=()=>playC(1.1);
+  document.getElementById("slow").onclick=()=>playC(.65);
+  document.getElementById("showc").onclick=()=>document.getElementById("ctext").innerHTML=`<div class="phrase" style="font-size:22px;margin-top:8px">${esc(t.c)}</div>${ur(t.c)}`;
+  document.getElementById("hint").onclick=()=>{ document.getElementById("hintbox").innerHTML=`<div class="phrase" style="font-size:22px">${esc(t.r)}</div>${ur(t.r)}`; say(t.r); };
+  mb.wire();
+  if(!micAvailable()){ document.getElementById("selfok").onclick=()=>nextItem(true); document.getElementById("selfno").onclick=()=>nextItem(false); }
+  function show(ok){ document.getElementById("nav").hidden=false;
+    if(!document.getElementById("hintbox").innerHTML) document.getElementById("hintbox").innerHTML=`<div class="phrase" style="font-size:22px">${esc(t.r)}</div>${ur(t.r)}`;
+    document.getElementById("ok").onclick=()=>nextItem(ok);
+    document.getElementById("redo").onclick=()=>render(); }
+  setTimeout(()=>playC(1.1),300);
+}
+
+/* ============ PHRASES ============ */
+let openCat=null;
+function renderPhrases(){
+  if(!openCat){
+    $v.innerHTML=`<h1>Phrases</h1><p class="sub">Tap a group. Tap a phrase to hear it.</p>
+      <div class="cats">${CATS.map(c=>{ const n=c.phrases.length, k=c.phrases.filter((_,i)=>(S.cards["p:"+c.id+i]?.box||0)>=2).length;
+        return `<button class="cat" data-cat="${c.id}"><i>${c.icon}</i><b>${esc(c.name)}</b>${urT(CAT_UR[c.id])}<span class="note">${k} of ${n} known</span></button>`}).join("")}</div>`;
+    $v.querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>{openCat=b.dataset.cat;render();scrollTo(0,0)});
+    return;
+  }
+  const c=CATS.find(x=>x.id===openCat);
+  const items=ALLP.filter(p=>p.cat===c.id);
+  $v.innerHTML=`<div class="top"><button class="back" id="pback" aria-label="Back">←</button><h2>${c.icon} ${esc(c.name)}</h2></div>${urT(CAT_UR[c.id])}
+    <button class="big primary" id="pall">🎤 Practice this group</button>
+    <div class="plist">${items.map(p=>`<div class="pitem"><span class="t">${esc(p.en)}${ur(p.en)}</span>
+      <button data-say="${p.id}" aria-label="Listen">🔊</button><button data-slow="${p.id}" aria-label="Listen slowly">🐢</button></div>`).join("")}</div>`;
+  document.getElementById("pback").onclick=()=>{openCat=null;render()};
+  document.getElementById("pall").onclick=()=>speakSession(items,c.name);
+  $v.querySelectorAll("[data-say]").forEach(b=>b.onclick=()=>say(BYID[b.dataset.say].en));
+  $v.querySelectorAll("[data-slow]").forEach(b=>b.onclick=()=>say(BYID[b.dataset.slow].en,{rate:.65}));
+}
+
+/* ============ TEXAS TALK ============ */
+function renderAccent(){
+  $v.innerHTML=`<h1>Texas talk</h1>
+    <p class="sub">How customers in Texas really speak. White and Black Texans share most of these. The phone voice can't do a real Texas accent, so read "sounds like" and listen to real people too.</p>
+    <button class="big primary" id="ears">👂 Practice hearing customers</button>
+    <div class="card">${ACCENT.map((a,i)=>`<div class="feature"><b>${esc(a.t)}</b><span>${esc(a.d)}</span>${urOn()?urT(ACCENT_UR[i][0]+": "+ACCENT_UR[i][1]):""}
+      <button data-ex="${i}">🔊 “${esc(a.ex)}”</button></div>`).join("")}</div>
+    <div class="card"><b>Listen to real Texans</b><p class="note">Watch a few minutes of local Texas TV news, Texas YouTube food reviews, or drive-thru videos. Say what you hear out loud.</p>
+      <a href="https://www.youtube.com/results?search_query=texas+drive+thru+order" target="_blank" rel="noopener" style="color:var(--flame);font-weight:700">Open YouTube: Texas drive-thru videos ↗</a></div>`;
+  document.getElementById("ears").onclick=()=>listenSession(pick(ALLC,8).length?pick(ALLC,8):shuffle(ALLC).slice(0,8),"Hear customers");
+  $v.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>say(ACCENT[b.dataset.ex].ex,{rate:1.05,kind:"cust"}));
+}
+
+/* ============ SESSIONS ============ */
+function allSessions(){
+  const out=[]; const tk=dkey();
+  Object.keys(S.days).sort().forEach(k=>{ const d=S.days[k]; let n=0;
+    (d.hist||[]).forEach(h=>out.push({day:k,n:++n,sec:h.sec,steps:h.steps,live:false}));
+    const cur=d.sec-(d.roundStart||0);
+    if(cur>=60||d.done.length) out.push({day:k,n:++n,sec:cur,steps:d.done.length,live:k===tk});
+  });
+  out.forEach(x=>x.full=x.sec>=DAY_GOAL);
+  return out;
+}
+function sessStats(){ const a=allSessions(); return {all:a, full:a.filter(x=>x.full).length, part:a.filter(x=>!x.full&&!x.live).length, live:a.find(x=>x.live&&!x.full)}; }
+function niceDay(k){ const [y,m,dd]=k.split("-").map(Number); const d=new Date(y,m-1,dd); const t=dkey(); const yd=new Date(); yd.setDate(yd.getDate()-1);
+  return k===t?"Today":k===dkey(yd)?"Yesterday":d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"}); }
+function renderSessions(){
+  const st=sessStats(); const list=[...st.all].reverse();
+  $v.innerHTML=`<div class="top"><button class="back" id="sback" aria-label="Back">←</button><h2>📅 My sessions</h2></div>
+    <div class="card"><div class="stats">
+      <div><b style="color:var(--good)">${st.full}</b><span>✔ Completed<br>30 min or more</span></div>
+      <div><b style="color:var(--bad)">${st.part}</b><span>⏳ Not finished<br>under 30 min</span></div>
+      <div><b>${st.all.length}</b><span>All sessions</span></div></div>
+      ${st.live?`<p class="note">Today's session is still going: ${fmtMin(st.live.sec)} of 30 min. It counts when she reaches 30 minutes or starts a new round.</p>`:""}</div>
+    ${list.length?`<div class="plist">${list.map((x,i)=>`<div class="pitem" style="gap:12px">
+      <span style="font-size:26px">${x.full?"✔":x.live?"▶":"⏳"}</span>
+      <span class="t"><b>${niceDay(x.day)}</b>${x.n>1||(S.days[x.day].hist||[]).length?` · round ${x.n}`:""}<br>
+      <span class="note">${fmtMin(x.sec)} min · ${x.steps} of 5 steps · ${x.full?"Completed":x.live?"In progress":"Not finished"}</span></span>
+      <span style="font-variant-numeric:tabular-nums;font-weight:700;color:${x.full?"var(--good)":"var(--soft)"}">#${list.length-i}</span></div>`).join("")}</div>`
+      :`<div class="card"><b>No sessions yet</b><p class="note">Go to Today and tap Start. Each practice of 30 minutes or more counts as a completed session.</p></div>`}`;
+  document.getElementById("sback").onclick=()=>setTab("today");
+}
+
+/* ============ PROGRESS ============ */
+function renderProgress(){
+  const days=[]; for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); days.push({k:dkey(d),l:"SMTWTFS"[d.getDay()],sec:S.days[dkey(d)]?.sec||0}); }
+  const all=[...ALLP,...ALLC]; const learned=all.filter(x=>(S.cards[x.id]?.box||0)>=1).length;
+  const strong=all.filter(x=>(S.cards[x.id]?.box||0)>=4).length;
+  const totalMin=Object.values(S.days).reduce((a,d)=>a+d.sec,0)/60|0;
+  $v.innerHTML=`<h1>Progress</h1>
+    <div class="card"><div class="stats"><div><b>🔥 ${streak()}</b><span>days in a row</span></div><div><b>${learned}</b><span>of ${all.length} practiced</span></div><div><b>${strong}</b><span>remembered well</span></div></div></div>
+    <button class="big ghost" id="psess">📅 My sessions · ✔ ${sessStats().full} done · ⏳ ${sessStats().part} not finished</button>
+    <div class="card"><b>Minutes this week</b><div class="week">${days.map(d=>`<div><s class="${d.sec>=DAY_GOAL?"full":""}" style="height:${Math.min(100,d.sec/DAY_GOAL*100)}%"></s>${d.l}</div>`).join("")}</div>
+      <p class="note">Green = 30 minutes done. Total: ${totalMin} minutes.</p></div>
+    <div class="card"><b>Urdu help اردو</b><div class="seg" style="grid-template-columns:1fr 1fr"><button data-ur="1" aria-pressed="${urOn()}">Show Urdu</button><button data-ur="0" aria-pressed="${!urOn()}">English only</button></div>
+      <p class="note">Tip: when she knows a phrase well, turn Urdu off to practice thinking in English.</p></div>
+    <div class="card"><b>Voice speed</b><div class="seg">${[[.75,"Slow"],[1,"Normal"],[1.2,"Fast"]].map(([r,l])=>`<button data-rate="${r}" aria-pressed="${S.rate==r}">${l}</button>`).join("")}</div>
+      <b>Voice</b><select id="voice"><option value="">Default</option>${voices.map(v=>`<option ${v.name===S.voice?"selected":""}>${esc(v.name)}</option>`).join("")}</select>
+      <button class="big ghost" id="test">🔊 Test voice</button></div>
+    <div class="card"><b>How this app helps you remember</b>
+      <p class="note">Every phrase comes back: the next day, then in 2 days, 4 days, 1 week, 2 weeks and 1 month. If you miss it, it comes back today. Do a little every day. 30 minutes every day is better than 3 hours once a week.</p></div>
+    <div class="card"><b>Start over</b><p class="note">Deletes all progress on this phone.</p>
+      <div id="resetbox"><button class="big ghost" id="reset">Reset progress</button></div></div>`;
+  document.getElementById("psess").onclick=()=>{view="sessions";render();scrollTo(0,0)};
+  $v.querySelectorAll("[data-ur]").forEach(b=>b.onclick=()=>{S.ur=b.dataset.ur==="1";save();render()});
+  $v.querySelectorAll("[data-rate]").forEach(b=>b.onclick=()=>{S.rate=+b.dataset.rate;save();render()});
+  document.getElementById("voice").onchange=e=>{S.voice=e.target.value;save()};
+  document.getElementById("test").onclick=()=>say("Welcome to Burger King, what can I get for you today?");
+  document.getElementById("reset").onclick=()=>{ document.getElementById("resetbox").innerHTML=`<div class="row"><button class="big ghost" id="rno">Cancel</button><button class="big primary" id="ryes">Yes, delete</button></div>`;
+    document.getElementById("rno").onclick=render; document.getElementById("ryes").onclick=()=>{S={cards:{},days:{},rate:1,voice:"",dialog:0};save();render();toast("Progress deleted.")}; };
+}
+
+/* ============ ROUTER ============ */
+function render(){
+  document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-current",(b.dataset.tab===view||(view==="session"&&false))?"page":"false"));
+  if(view==="today") renderToday();
+  else if(view==="phrases") renderPhrases();
+  else if(view==="accent") renderAccent();
+  else if(view==="progress") renderProgress();
+  else if(view==="session") renderSession();
+  else if(view==="sessions") renderSessions();
+}
+render();
+</script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{})</script></body></html>
